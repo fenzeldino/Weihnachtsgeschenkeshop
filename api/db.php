@@ -1,9 +1,15 @@
 <?php
 // zugangsdaten für die uni datenbank
 $host = "localhost";
-$user = "g13";        // dein nutzer
-$pass = "dm38tan";    // dein passwort
-$db   = "g13";        // deine datenbank
+$user = "g13";        
+$pass = "dm38tan";    
+$db   = "g13"; 
+
+//lokal
+//$host = "localhost";
+//$user = "root";      
+//$pass = "";          
+//$db   = "shop_db";   
 
 $conn = new mysqli($host, $user, $pass, $db);
 
@@ -12,5 +18,5 @@ if ($conn->connect_error) {
     die(json_encode(["error" => "datenbank verbindung fehlgeschlagen"]));
 }
 
-// wichtig: utf8 sonst gehen umlaute kaputt
+// utf8 für umlaute
 $conn->set_charset("utf8mb4");

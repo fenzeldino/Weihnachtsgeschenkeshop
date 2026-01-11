@@ -10,8 +10,8 @@ $result = $conn->query($sql);
 $orders = [];
 if ($result) {
     while($row = $result->fetch_assoc()) {
-        // wir haben die kundendaten als json text gespeichert,
-        // müssen sie jetzt zurückwandeln damit vue sie lesen kann
+        // kundendaten sind als json text gespeichert,
+        // -> zurückwandeln damit vue sie lesen kann
         $row['customer_data'] = json_decode($row['customer_data']);
         $orders[] = $row;
     }

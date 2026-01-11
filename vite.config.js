@@ -3,10 +3,8 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
-  // pfad auf dem uni server.
-  // ohne das findet die index.html die css/js dateien nicht.
+  // der pfad auf dem server, sonst findet er css/js nicht
   base: '/ewa/g13/aplbeleg/',
-  
   plugins: [
     vue(),
   ],

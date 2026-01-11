@@ -4,22 +4,21 @@ export function useProducts() {
   const products = ref([]);
   const error = ref(null);
 
-  // daten von der php api holen
+  // produkte von der php api laden
   const fetchProducts = async () => {
     try {
-      // url kommt aus der .env datei (lokal localhost, live api/)
       const baseUrl = import.meta.env.VITE_API_BASE_URL;
       const res = await fetch(baseUrl + 'products.php');
       
-      if (!res.ok) throw new Error("API antwortet nicht");
+      if (!res.ok) throw new Error("API fehler");
       
       products.value = await res.json();
     } catch (e) {
-      error.value = "konnte produkte nicht laden: " + e.message;
+      error.value = "fehler beim laden: " + e.message;
     }
   };
 
-  // funktion um bestand zu ändern (für admin)
+  // lagerbestand update an api senden
   const updateProductStock = async (product) => {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
     try {
@@ -34,7 +33,7 @@ export function useProducts() {
     }
   };
 
-  // direkt beim laden ausführen
+  // direkt beim start laden
   onMounted(fetchProducts);
 
   return { products, error, fetchProducts, updateProductStock };

@@ -1,20 +1,21 @@
 import { ref, computed } from 'vue';
 
-// wir machen die cart variable ausserhalb der funktion.
-// damit bleibt der warenkorb erhalten auch wenn man die seite wechselt (singleton).
+// cart liegt ausserhalb der funktion = globaler state (singleton).
+// so bleiben die daten erhalten wenn man die ansicht wechselt.
 const cart = ref([]);
 
 export function useCart() {
   
-  // produkt hinzufügen, aber vorher checken ob bestand reicht
+  // funktion zum hinzufügen
   const addToCart = (product) => {
-    // erst mal schauen ob überhaupt bestand da ist
+    // erst mal checken ob lagerbestand da ist
     if (product.stock <= 0) return "ausverkauft";
 
+    // schauen ob das produkt schon im Warenkorb ist
     const item = cart.value.find(i => i.id === product.id);
     const currentQty = item ? item.qty : 0;
 
-    // wir dürfen nicht mehr reinlegen als im lager ist
+    // man darf nicht mehr reinlegen als da ist
     if (currentQty + 1 > product.stock) {
       return "limit_reached"; 
     }
@@ -22,7 +23,7 @@ export function useCart() {
     if (item) {
       item.qty++;
     } else {
-      // kopie vom produkt machen und menge auf 1 setzen
+      // objekt kopieren und mit menge 1 reinpacken
       cart.value.push({ ...product, qty: 1 });
     }
     return "success";
@@ -32,20 +33,20 @@ export function useCart() {
     cart.value.splice(index, 1);
   };
 
-  // logik für plus/minus buttons
+  // logik für die +/- buttons
   const updateCartQty = (item, change) => {
     const newQty = item.qty + change;
 
-    // beim erhöhen müssen wir wieder das limit prüfen
+    // beim erhöhen muss das limit gecheckt werden
     if (change > 0) {
       if (newQty > item.stock) {
-        return false; // ging nicht, fehler zurückgeben
+        return false; // fehler zurückgeben
       }
     }
 
     item.qty = newQty;
 
-    // wenn menge 0 ist, fliegt der artikel ganz raus
+    // wenn menge 0 ist, artikel rauswerfen
     if (item.qty <= 0) {
       cart.value = cart.value.filter(i => i.id !== item.id);
     }
@@ -53,16 +54,17 @@ export function useCart() {
     return true; 
   };
 
-  // summe berechnen
+  // gesamtpreis berechnen
   const cartTotal = computed(() => {
     return cart.value.reduce((sum, item) => sum + (item.price * item.qty), 0);
   });
 
-  // mehrwertsteuer 7% (laut aufgabe)
+  // mwst anteil 7%
   const vatAmount = computed(() => {
     return cartTotal.value * 0.07; 
   });
 
+  // anzahl aller items für den header bubble
   const totalItems = computed(() => {
     return cart.value.reduce((sum, item) => sum + item.qty, 0);
   });
