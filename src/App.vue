@@ -1,18 +1,26 @@
 <script setup>
+/*
+  Gruppe: 13
+  Mitglieder: Daniel Menzel, Rohullah Sediqi, Tesch Etienne Mathis
+  Beleg: Weihnachtsgeschenkeshop
+*/
+
 import { ref, computed, onMounted } from 'vue';
 import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
 import { useProducts } from './composables/useProducts';
 import { useCart } from './composables/useCart';
 
-// --- SETUP ---
+// holen der logik aus den composables
+// damit bleibt die datei hier übersichtlicher
 const { products, error, updateProductStock, fetchProducts } = useProducts();
 const { 
   cart, addToCart, removeFromCart, updateCartQty, 
   cartTotal, vatAmount, totalItems 
 } = useCart();
 
-// ui zustand
+// variablen für den zustand der oberfläche
+// currentView steuert welche seite angezeigt wird da es eine spa ist
 const currentView = ref('catalog');
 const user = ref(null);
 const loginInput = ref({ username: '', password: '' });
@@ -20,17 +28,18 @@ const message = ref('');
 const searchQuery = ref('');
 const adminOrders = ref([]);
 
-// --- FORMULAR DATEN ---
+// formular daten für den kunden im warenkorb
 const customer = ref({
   vorname: '', nachname: '', email: '',
   strasse: '', ort: '', plz: '', 
   alter: null, interesse: 5, nachricht: ''
 });
 
-// validierung für den button
+// validierung der eingabefelder
+// gibt für jedes feld true oder false zurück
 const validationStatus = computed(() => {
   const c = customer.value;
-  // sicherstellen dass es strings sind und leerzeichen weg
+  // umwandlung in strings und leerzeichen entfernen um fehler zu vermeiden
   const vn = String(c.vorname || '').trim();
   const nn = String(c.nachname || '').trim();
   const mail = String(c.email || '').trim();
@@ -41,29 +50,33 @@ const validationStatus = computed(() => {
   return {
     vorname: vn.length >= 2,
     nachname: nn.length >= 2,
-    email: mail.includes('@'), // punkt ist bei localhost optional
-    plz: /^\d{5}$/.test(p),    // regex für genau 5 zahlen
+    email: mail.includes('@'), // einfache prüfung auf email format
+    plz: /^\d{5}$/.test(p),    // prüfung ob es genau 5 ziffern sind
     strasse: st.length >= 4,
     ort: ot.length >= 2, 
   };
 });
 
+// prüft ob das gesamte formular gültig ist
+// nur wenn das true ist wird der checkout button aktiv
 const isFormValid = computed(() => {
   const s = validationStatus.value;
   return s.vorname && s.nachname && s.email && s.plz && s.strasse && s.ort; 
 });
 
-// --- FILTER ---
+// filterung der produkte für die suche
 const filteredProducts = computed(() => {
   if (!searchQuery.value) return products.value;
   const term = searchQuery.value.toLowerCase();
   return products.value.filter(p => p.title.toLowerCase().includes(term));
 });
 
+// berechnung des gesamtpreises für die anzeige
 const totalWithVat = computed(() => cartTotal.value);
 
-// --- EVENTS ---
+// event handler funktionen
 
+// produkt in den warenkorb legen
 const handleAddToCart = (product) => {
   const result = addToCart(product);
   if (result === "ausverkauft") message.value = "artikel ist ausverkauft!";
@@ -74,6 +87,7 @@ const handleAddToCart = (product) => {
   }
 };
 
+// menge im warenkorb ändern
 const handleCartQtyChange = (item, change) => {
   if (!updateCartQty(item, change)) {
     message.value = "nicht mehr auf lager!";
@@ -81,6 +95,7 @@ const handleCartQtyChange = (item, change) => {
   }
 };
 
+// bestellungen für den admin laden
 const fetchOrders = async () => {
   try {
     const res = await fetch(import.meta.env.VITE_API_BASE_URL + 'get_orders.php');
@@ -88,6 +103,8 @@ const fetchOrders = async () => {
   } catch(e) { console.error(e); }
 };
 
+// login funktion
+// prüft hardcodiert auf admin und adm24 laut aufgabenstellung
 const handleLogin = () => {
   if (loginInput.value.username === 'admin' && loginInput.value.password === 'adm24') {
     user.value = { name: 'Admin', role: 'admin' };
@@ -99,6 +116,7 @@ const handleLogin = () => {
   }
 };
 
+// speichert alle lagerbestände in die datenbank
 const handleUpdateAllStocks = async () => {
   message.value = "speichere...";
   let err = 0;
@@ -108,11 +126,11 @@ const handleUpdateAllStocks = async () => {
   message.value = err === 0 ? "alles gespeichert!" : "probleme beim speichern.";
 };
 
-// --- CHECKOUT ---
+// checkout prozess starten
 const handleCheckout = async () => {
   if (cart.value.length === 0) return;
 
-  // debug in der konsole falls probleme auftreten
+  // konsole ausgabe falls validierung fehlschlägt
   console.log("Validation Check:", validationStatus.value);
 
   if (!isFormValid.value) {
@@ -124,6 +142,7 @@ const handleCheckout = async () => {
   
   try {
     const baseUrl = import.meta.env.VITE_API_BASE_URL;
+    // daten an das backend senden
     const res = await fetch(baseUrl + 'checkout.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -138,8 +157,8 @@ const handleCheckout = async () => {
 
     const data = await res.json();
 
+    // weiterleitung zu stripe wenn session id da ist
     if (data.id) {
-      // public key
       const stripe = Stripe('pk_test_51Sf50LPfKVgT4yvvJzL4Gz4DHUbhx2BHryUUj4JOF3gK4dpJnU0DKC2P3K6DTxNng9S4dcFEBu9uIZAf5hBpBySG00ILbYwXP4');
       const result = await stripe.redirectToCheckout({ sessionId: data.id });
       if (result.error) message.value = result.error.message;
@@ -152,6 +171,7 @@ const handleCheckout = async () => {
   }
 };
 
+// beim laden der seite produkte holen und url prüfen
 onMounted(() => {
   fetchProducts();
   const urlParams = new URLSearchParams(window.location.search);
@@ -164,13 +184,6 @@ onMounted(() => {
 </script>
 
 <template>
-
-  <!-- 
-  Gruppe: 13
-  Mitglieder:  Daniel Menzel,Rohullah Sediqi, Tesch Etienne Mathis
-  Beleg: Weihnachtsgeschenkeshop
-  -->
-
   <Header 
     :cart-count="totalItems"
     :is-logged-in="user !== null"
@@ -181,26 +194,34 @@ onMounted(() => {
   <main class="container">
     <div v-if="message" class="alert-box">{{ message }}<span class="close-btn" @click="message = ''">×</span></div>
 
-    <!-- KATALOG -->
+    <!-- catalog ansicht -->
     <div id="page-catalog" v-if="currentView === 'catalog'">
       <h2 class="section-title">Weihnachts-Angebote</h2>
+      
+      <!-- suchfeld -->
       <div class="search-container">
-        <input v-model="searchQuery" type="text" class="search-input" placeholder="🔍 Geschenke suchen...">
+        <input v-model="searchQuery" type="text" class="search-input" placeholder="🔍 Geschenke suchen..." data-testid="search-input">
       </div>
+
       <div class="product-grid">
-        <div v-for="product in filteredProducts" :key="product.id" class="card">
-          <div class="card-img-container"><img :src="product.image_url" alt="Produktbild"></div>
+        <!-- produkt karte-->
+        <div v-for="product in filteredProducts" :key="product.id" class="card" data-testid="product">
+          <div class="card-img-container">
+            <img :src="product.image_url" alt="Produktbild" data-testid="product-image">
+          </div>
           <div class="card-body">
-            <h3 class="product-title">{{ product.title }}</h3>
-            <p class="price">{{ product.price.toFixed(2) }} €</p>
+            <h3 class="product-title" data-testid="product-title">{{ product.title }}</h3>
+            <!-- preis anzeige -->
+            <p class="price" data-testid="product-price">{{ product.price.toFixed(2) }} €</p>
             <p class="stock-info" :class="{'low-stock': product.stock < 5}">Lager: {{ product.stock }}</p>
-            <button @click="handleAddToCart(product)" class="btn btn-primary">In den Warenkorb</button>
+            <!-- bestellen button -->
+            <button @click="handleAddToCart(product)" class="btn btn-primary" data-testid="product-order">In den Warenkorb</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- WARENKORB -->
+    <!-- warenkorb ansicht -->
     <div id="page-cart" v-if="currentView === 'cart'">
       <h2 class="section-title">Dein Warenkorb</h2>
       <div v-if="cart.length === 0" class="empty-cart">
@@ -226,7 +247,7 @@ onMounted(() => {
           </tbody>
         </table>
 
-        <!-- FORMULAR -->
+        <!-- formular für kundendaten -->
         <div class="registration-form card">
           <h3>Lieferdaten</h3>
           <div class="form-grid">
@@ -243,13 +264,13 @@ onMounted(() => {
               <input v-model="customer.email" :class="{invalid: !validationStatus.email}" type="email" placeholder="Muss @ enthalten">
             </div>
             <div class="form-group full-width"><label>Straße</label>
-              <input v-model="customer.strasse" :class="{invalid: !validationStatus.strasse}" type="text" maxlength="20" placeholder="Min. 4 Zeichen"></div>
+              <input v-model="customer.strasse" :class="{invalid: !validationStatus.strasse}" type="text" placeholder="Min. 4 Zeichen"></div>
             <div class="form-group">
               <label>PLZ* (5 Zahlen)</label>
               <input v-model="customer.plz" :class="{invalid: !validationStatus.plz}" type="text" maxlength="5" placeholder="12345">
             </div>
             <div class="form-group"><label>Ort</label>
-              <input v-model="customer.ort" :class="{invalid: !validationStatus.ort}" type="text" maxlength="25" placeholder="Min. 2 Zeichen"></div>
+              <input v-model="customer.ort" :class="{invalid: !validationStatus.ort}" type="text" placeholder="Min. 2 Zeichen"></div>
             <div class="form-group"><label>Alter</label><input v-model="customer.alter" type="number" min="3" max="120"></div>
             <div class="form-group full-width">
               <label>Interesse an weiteren Produkten (0-10): {{ customer.interesse }}</label>
@@ -259,12 +280,21 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- zusammenfassung -->
         <div id="cart-summary" class="cart-summary">
           <h3>Summe</h3>
-          <p>Anzahl: {{ totalItems }}</p>
+          <p>
+            Anzahl Artikel: <span data-testid="cart-total-items">{{ totalItems }}</span>
+          </p>
+          <p>
+            <!-- das ist die anforderung für die anzahl der positionen (array länge) -->
+            Positionen: <span data-testid="cart-total-positions">{{ cart.length }}</span>
+          </p>
           <p class="vat-info">MwSt (7%): {{ vatAmount.toFixed(2) }} €</p>
           <hr>
-          <p class="total-price">Gesamt: {{ totalWithVat.toFixed(2) }} €</p>
+          <p class="total-price">
+            Gesamt: <span data-testid="cart-total-price">{{ totalWithVat.toFixed(2) }}</span> €
+          </p>
           
           <button @click="handleCheckout" class="btn btn-checkout">
             {{ isFormValid ? 'Zur Kasse (Stripe)' : 'Bitte Formular prüfen' }}
@@ -276,25 +306,28 @@ onMounted(() => {
             <span v-if="!validationStatus.email">Email?, </span>
             <span v-if="!validationStatus.plz">PLZ (5 Zahlen)? </span>
             <span v-if="!validationStatus.strasse">Straße?, </span>
-            <span v-if="!validationStatus.ort">Ort?, </span>
+            <span v-if="!validationStatus.ort">Ort? </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- LOGIN & ADMIN -->
+    <!-- login bereich -->
     <div id="page-login" v-if="currentView === 'login'">
       <div class="login-card">
         <h2>Admin Login</h2>
-        <input v-model="loginInput.username" placeholder="User" class="login-input">
-        <input v-model="loginInput.password" type="password" placeholder="Pass" class="login-input">
-        <button @click="handleLogin" class="btn btn-primary w-100">Einloggen</button>
+        <input v-model="loginInput.username" placeholder="User" class="login-input" data-testid="login-username">
+        <input v-model="loginInput.password" type="password" placeholder="Pass" class="login-input" data-testid="login-password">
+        <button @click="handleLogin" class="btn btn-primary w-100" data-testid="login-submit">Einloggen</button>
       </div>
     </div>
 
+    <!-- admin bereich-->
     <div id="page-admin" v-if="currentView === 'admin'">
       <h2 class="section-title">Admin</h2>
-      <table class="admin-table">
+      
+      <!-- tabelle lagerbestand  -->
+      <table class="admin-table" data-testid="admin-stock-table">
         <thead><tr><th>Produkt</th><th>Preis</th><th>Bestand</th></tr></thead>
         <tbody>
           <tr v-for="p in products" :key="p.id">
@@ -303,11 +336,16 @@ onMounted(() => {
           </tr>
         </tbody>
       </table>
-      <button @click="handleUpdateAllStocks" class="btn btn-warning mt-20">Alle speichern</button>
+      
+      <!-- button zum speichern -->
+      <button @click="handleUpdateAllStocks" class="btn btn-warning mt-20" data-testid="admin-update-stock">Alle speichern</button>
+      
       <hr style="margin: 40px 0;">
       <h3>Bestellungen</h3>
       <button @click="fetchOrders" class="btn btn-secondary mb-20">Aktualisieren</button>
-      <table class="admin-table mt-2">
+      
+      <!-- tabelle bestellungen -->
+      <table class="admin-table mt-2" data-testid="admin-orders-table">
         <thead><tr><th>ID</th><th>Datum</th><th>Kunde</th><th>Summe</th></tr></thead>
         <tbody>
           <tr v-for="order in adminOrders" :key="order.id">
