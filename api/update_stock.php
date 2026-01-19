@@ -1,4 +1,10 @@
 <?php
+/*
+  Gruppe: 13
+  Mitglieder:  Daniel Menzel,Rohullah Sediqi, Tesch Etienne Mathis
+  Beleg: Weihnachtsgeschenkeshop
+*/
+
 // cors header setzen (standard prozedur)
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -15,14 +21,14 @@ require_once 'db.php';
 
 $input = json_decode(file_get_contents("php://input"), true);
 
-// kurz checken ob wir alles haben was wir brauchen
+// kurz checken ob alles da ist
 if (!isset($input['id']) || !isset($input['stock'])) {
     http_response_code(400);
     echo json_encode(["error" => "daten fehlen"]);
     exit;
 }
 
-// sicherstellen dass es zahlen sind (ganz wichtig!)
+// sicherstellen dass es zahlen sind 
 $id = (int)$input['id'];
 $stock = (int)$input['stock'];
 

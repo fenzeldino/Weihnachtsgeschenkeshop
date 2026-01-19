@@ -1,3 +1,9 @@
+<!-- 
+  Gruppe: 13
+  Mitglieder:  Daniel Menzel,Rohullah Sediqi, Tesch Etienne Mathis
+  Beleg: Weihnachtsgeschenkeshop
+-->
+
 <script setup>
 defineProps({
   cartCount: Number,

@@ -35,18 +35,22 @@ const validationStatus = computed(() => {
   const nn = String(c.nachname || '').trim();
   const mail = String(c.email || '').trim();
   const p = String(c.plz || '').trim();
+  const st = String(c.strasse || '').trim();
+  const ot = String(c.ort || '').trim();
 
   return {
     vorname: vn.length >= 2,
     nachname: nn.length >= 2,
     email: mail.includes('@'), // punkt ist bei localhost optional
-    plz: /^\d{5}$/.test(p)     // regex für genau 5 zahlen
+    plz: /^\d{5}$/.test(p),    // regex für genau 5 zahlen
+    strasse: st.length >= 4,
+    ort: ot.length >= 2, 
   };
 });
 
 const isFormValid = computed(() => {
   const s = validationStatus.value;
-  return s.vorname && s.nachname && s.email && s.plz;
+  return s.vorname && s.nachname && s.email && s.plz && s.strasse && s.ort; 
 });
 
 // --- FILTER ---
@@ -160,6 +164,13 @@ onMounted(() => {
 </script>
 
 <template>
+
+  <!-- 
+  Gruppe: 13
+  Mitglieder:  Daniel Menzel,Rohullah Sediqi, Tesch Etienne Mathis
+  Beleg: Weihnachtsgeschenkeshop
+  -->
+
   <Header 
     :cart-count="totalItems"
     :is-logged-in="user !== null"
@@ -231,12 +242,14 @@ onMounted(() => {
               <label>Email*</label>
               <input v-model="customer.email" :class="{invalid: !validationStatus.email}" type="email" placeholder="Muss @ enthalten">
             </div>
-            <div class="form-group full-width"><label>Straße</label><input v-model="customer.strasse" type="text"></div>
+            <div class="form-group full-width"><label>Straße</label>
+              <input v-model="customer.strasse" :class="{invalid: !validationStatus.strasse}" type="text" maxlength="20" placeholder="Min. 4 Zeichen"></div>
             <div class="form-group">
               <label>PLZ* (5 Zahlen)</label>
               <input v-model="customer.plz" :class="{invalid: !validationStatus.plz}" type="text" maxlength="5" placeholder="12345">
             </div>
-            <div class="form-group"><label>Ort</label><input v-model="customer.ort" type="text"></div>
+            <div class="form-group"><label>Ort</label>
+              <input v-model="customer.ort" :class="{invalid: !validationStatus.ort}" type="text" maxlength="25" placeholder="Min. 2 Zeichen"></div>
             <div class="form-group"><label>Alter</label><input v-model="customer.alter" type="number" min="3" max="120"></div>
             <div class="form-group full-width">
               <label>Interesse an weiteren Produkten (0-10): {{ customer.interesse }}</label>
@@ -262,6 +275,8 @@ onMounted(() => {
             <span v-if="!validationStatus.nachname">Nachname?, </span>
             <span v-if="!validationStatus.email">Email?, </span>
             <span v-if="!validationStatus.plz">PLZ (5 Zahlen)? </span>
+            <span v-if="!validationStatus.strasse">Straße?, </span>
+            <span v-if="!validationStatus.ort">Ort?, </span>
           </div>
         </div>
       </div>
@@ -342,6 +357,7 @@ input.invalid { border-color: red; background-color: #fff0f0 !important; }
 .btn-secondary { background: #95a5a6; }
 .btn btn-secondary { margin: 8px; cursor: pointer; border: none; border-radius: 5px; }
 .btn btn-warning mt-2 {margin: 8px; cursor: pointer; border: none; border-radius: 5px; }
+
 /* Entfernen Button*/
 .btn-danger { background: #e74c3c; padding: 10px 20px; border-radius: 5px; font-size: 1rem; color: white; border: none; cursor: pointer; }
 .btn-warning { background: var(--accent); }

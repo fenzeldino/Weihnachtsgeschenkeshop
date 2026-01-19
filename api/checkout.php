@@ -1,4 +1,10 @@
 <?php
+/*
+  Gruppe: 13
+  Mitglieder:  Daniel Menzel,Rohullah Sediqi, Tesch Etienne Mathis
+  Beleg: Weihnachtsgeschenkeshop
+*/
+
 // damit keine fehler ins json rutschen
 ob_start();
 

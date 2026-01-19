@@ -1,4 +1,10 @@
 <?php
+/*
+  Gruppe: 13
+  Mitglieder:  Daniel Menzel,Rohullah Sediqi, Tesch Etienne Mathis
+  Beleg: Weihnachtsgeschenkeshop
+*/
+
 // header setzen damit vue auch vom anderen server zugreifen kann (cors)
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");

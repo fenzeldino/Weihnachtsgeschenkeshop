@@ -1,3 +1,9 @@
+<!-- 
+  Gruppe: 13
+  Mitglieder:  Daniel Menzel,Rohullah Sediqi, Tesch Etienne Mathis
+  Beleg: Weihnachtsgeschenkeshop
+-->
+  
 <template>
   <footer class="footer">
     <p>&copy; 2025 Gruppe 13 - Daniel, Rohullah & Etienne</p>

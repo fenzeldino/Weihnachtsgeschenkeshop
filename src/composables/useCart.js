@@ -1,3 +1,9 @@
+/*
+  Gruppe: 13
+  Mitglieder:  Daniel Menzel,Rohullah Sediqi, Tesch Etienne Mathis
+  Beleg: Weihnachtsgeschenkeshop
+*/
+
 import { ref, computed } from 'vue';
 
 // cart liegt ausserhalb der funktion = globaler state (singleton).

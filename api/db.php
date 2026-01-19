@@ -1,4 +1,10 @@
 <?php
+/*
+  Gruppe: 13
+  Mitglieder:  Daniel Menzel,Rohullah Sediqi, Tesch Etienne Mathis
+  Beleg: Weihnachtsgeschenkeshop
+*/
+
 // zugangsdaten für die uni datenbank
 $host = "localhost";
 $user = "g13";        
@@ -8,7 +14,7 @@ $db   = "g13";
 //lokal
 //$host = "localhost";
 //$user = "root";      
-//$pass = "";          
+//$pass = "";
 //$db   = "shop_db";   
 
 $conn = new mysqli($host, $user, $pass, $db);
