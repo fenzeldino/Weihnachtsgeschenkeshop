@@ -22,11 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // keine Warnungen im Output damit keine beschädigung des JSIN-Formats zustande kommen
 error_reporting(0);
 
-require_once 'db.php'; // DAtenbank verbindung
+require_once 'db.php'; // Datenbank verbindung
 require_once 'stripe-php/init.php'; // Stripe Bibliothek
+require_once('/var/www/db_config.php');
 
-
-\Stripe\Stripe::setApiKey('sk_test_51Sf50LPfKVgT4yvvCI5xo9GviVESNd1BlTuMgDcWd7NRkxuSu8h0K9D8TgIlNPUwVEBSzgvgephBQ3wUQYVYcniB00DVPSBBer'); 
+\Stripe\Stripe::setApiKey(STRIPE_SECRET_KEY); 
 
 //JSON-Daten empfangen und in Php umwandeln
 $input = json_decode(file_get_contents("php://input"), true);
