@@ -4,7 +4,7 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   // der pfad auf dem server, sonst findet er css/js nicht
-  base: '/ewa/g13/aplbeleg/',
+  base: '/weihnachtsgeschenkeshop/',
   plugins: [
     vue(),
   ],

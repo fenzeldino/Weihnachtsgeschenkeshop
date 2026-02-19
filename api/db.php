@@ -5,19 +5,9 @@
   Beleg: Weihnachtsgeschenkeshop
 */
 
-// zugangsdaten für die uni datenbank
-$host = "localhost";
-$user = "g13";        
-$pass = "dm38tan";    
-$db   = "g13"; 
+require_once('/var/www/db_config.php');
 
-//lokal
-//$host = "localhost";
-//$user = "root";      
-//$pass = "";
-//$db   = "shop_db";   
-
-$conn = new mysqli($host, $user, $pass, $db);
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
 if ($conn->connect_error) {
     http_response_code(500);
